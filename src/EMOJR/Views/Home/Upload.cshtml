@@ -1,0 +1,61 @@
+﻿<html>
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <input type='file' accept="image/*" onchange="loadImage(event)" id="filename" name="filename"/>
+    <img id="emotionIMG"/>
+    <br />
+    <button id="btn">Select</button>
+    <p id="response"></p>
+
+    <script type="text/javascript">
+        // Project Oxford Emotion API key
+        var apiKey = "4af70ba6f3f14ea7891543204e3c82c4";
+
+        // The base URL for the API
+        var apiUrl = "https://api.projectoxford.ai/emotion/v1.0/recognize";
+
+        // Load the image
+        var loadImage = function (event) {
+            var output = document.getElementById('emotionIMG');
+            output.src = URL.createObjectURL(event.target.files[0]);
+        };
+
+        $('#btn').click(function () {
+            var file = document.getElementById('filename').files[0];
+
+            CallAPI(file, apiUrl, apiKey);
+        });
+
+        function CallAPI(file, apiUrl, apiKey)
+        {
+            $.ajax({
+                url: apiUrl,
+                beforeSend: function (xhrObj) {
+                    xhrObj.setRequestHeader("Content-Type", "application/octet-stream");
+                    xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", apiKey);
+                },
+                type: "POST",
+                data: file,
+                processData: false
+            })
+                .done(function (response) {
+                    ProcessResult(response);
+                })
+                .fail(function (error) {
+                    $("#response").text(error.getAllResponseHeaders());
+                });
+        }
+
+        function ProcessResult(response)
+        {
+            var data = JSON.stringify(response);
+            //$("#response").text(data);
+            document.write(data[0].scores);
+        }
+    </script>
+</body>
+
+</html>
