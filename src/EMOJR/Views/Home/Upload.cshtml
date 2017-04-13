@@ -7,7 +7,8 @@
     <input type='file' accept="image/*" onchange="loadImage(event)" id="filename" name="filename"/>
     <img id="emotionIMG"/>
     <br />
-    <button id="btn">Select</button>
+    <button id="btn">Select</button><br />
+    <canvas id="myCanvas" />
     <p id="response"></p>
 
     <script type="text/javascript">
@@ -16,6 +17,76 @@
 
         // The base URL for the API
         var apiUrl = "https://api.projectoxford.ai/emotion/v1.0/recognize";
+
+        // Global variables
+        var Dict = {};
+        var addpair = function (my_key, my_value) {
+            Dict[my_key] = my_value;
+        }
+        var givevalue = function (my_key) {
+            return Dict[my_key];
+        }
+        var faceList = {}; // create an empty array
+        var addpair = function (my_key, my_value) {
+            faceList[my_key] = my_value;
+        }
+        var getvalue = function (my_key) {
+            return faceList[my_key];
+        }
+        addpair("Angry", "😡")
+        addpair("Contemptful", "😤")
+        addpair("Disgusted", "😷")
+        addpair("Afraid", "😱")
+        addpair("Happy", "😝")
+        addpair("Neutral", "😶")
+        addpair("Sad", "🙁")
+        addpair("Surprised", "😳")
+
+        var Painter = (function () {
+
+            var context = null;
+
+            return {
+                init: function (ctx) {
+                    context = ctx;
+                },
+
+                loadCanvas: function () {
+                    var file = document.getElementById('filename').files[0];
+
+                    var input = event.target;
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        var dataURL = reader.result;
+                        var imageObj = new Image();
+
+                        imageObj.src = dataURL;
+                        imageObj.onload = function () {
+                            var imgWidth = imageObj.naturalWidth;
+                            var imgHeight = imageObj.naturalHeight;
+                            context.canvas.width = imgWidth;
+                            context.canvas.height = imgHeight;
+                            context.drawImage(imageObj, 0, 0, imgWidth, imgHeight);
+
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                },
+
+                addEmoji: function (top, left, width, height, currentEmotion) {
+                    var fontSizes = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70];
+                    var emojiWidth, i = 0;
+                    do {
+                        context.font = fontSizes[i++] + 'px Arial';
+                        emojiWidth = context.measureText(faceList[currentEmotion]).width;
+                    } while (emojiWidth < width)
+
+                    context.font = fontSizes[i--] + 'px serif';
+                    context.fillText(faceList[currentEmotion], parseInt(left) - 2, parseInt(top) + parseInt(height) - 10);
+                }
+            }
+
+        })();
 
         // Load the image
         var loadImage = function (event) {
@@ -26,11 +97,13 @@
         $('#btn').click(function () {
             var file = document.getElementById('filename').files[0];
 
+            Painter.init(document.getElementById("myCanvas").getContext("2d"));
+            Painter.loadCanvas();
+
             CallAPI(file, apiUrl, apiKey);
         });
 
-        function CallAPI(file, apiUrl, apiKey)
-        {
+        function CallAPI(file, apiUrl, apiKey) {
             $.ajax({
                 url: apiUrl,
                 beforeSend: function (xhrObj) {
@@ -41,19 +114,89 @@
                 data: file,
                 processData: false
             })
-                .done(function (response) {
-                    ProcessResult(response);
-                })
-                .fail(function (error) {
-                    $("#response").text(error.getAllResponseHeaders());
-                });
+            .done(function (response) {
+                ProcessResult(response);
+            })
+            .fail(function (error) {
+                $("#response").text(error.getAllResponseHeaders());
+            });
         }
 
         function ProcessResult(response)
         {
-            var data = JSON.stringify(response);
-            //$("#response").text(data);
-            document.write(data[0].scores);
+
+            for (i = 0; i < response.length; i++) {
+                //$("#response").text(JSON.stringify(response[i]));
+
+                //current face detected
+                var top = JSON.stringify(response[i].faceRectangle.top);
+                var left = JSON.stringify(response[i].faceRectangle.left);
+                var width = JSON.stringify(response[i].faceRectangle.width);
+                var height = JSON.stringify(response[i].faceRectangle.height);
+                
+                //highest emotion
+                var currentEmotion = findEmotion(response, i);
+
+                Painter.addEmoji(top, left, width, height, currentEmotion);
+
+            }
+
+        }
+
+        function findEmotion(response, i) {
+            //current mood scores detected
+            var anger = JSON.stringify(response[i].scores.anger);
+            var contempt = JSON.stringify(response[i].scores.contempt);
+            var disgust = JSON.stringify(response[i].scores.disgust);
+            var fear = JSON.stringify(response[i].scores.fear);
+            var happiness = JSON.stringify(response[i].scores.happiness);
+            var neutral = JSON.stringify(response[i].scores.neutral);
+            var sadness = JSON.stringify(response[i].scores.sadness);
+            var surprise = JSON.stringify(response[i].scores.surprise);
+
+            var highestScore = 0;
+            var currentMood = ""
+            if (parseFloat(anger) > highestScore) {
+                highestScore = parseFloat(anger);
+                currentMood = "Angry";
+            }
+
+            if (parseFloat(contempt) > highestScore) {
+                highestScore = parseFloat(contempt);
+                currentMood = "Contemptful";
+            }
+
+            if (parseFloat(disgust) > highestScore) {
+                highestScore = parseFloat(disgust);
+                currentMood = "Disgusted";
+            }
+
+            if (parseFloat(fear) > highestScore) {
+                highestScore = parseFloat(fear);
+                currentMood = "Afraid";
+            }
+
+            if (parseFloat(happiness) > highestScore) {
+                highestScore = parseFloat(happiness);
+                currentMood = "Happy";
+            }
+
+            if (parseFloat(neutral) > highestScore) {
+                highestScore = parseFloat(neutral);
+                currentMood = "Neutral";
+            }
+
+            if (parseFloat(sadness) > highestScore) {
+                highestScore = parseFloat(sadness);
+                currentMood = "Sad";
+            }
+
+            if (parseFloat(surprise) > highestScore) {
+                highestScore = parseFloat(surprise);
+                currentMood = "Surprised";
+            }
+
+            return currentMood;
         }
     </script>
 </body>
