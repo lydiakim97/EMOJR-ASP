@@ -1,7 +1,6 @@
 ﻿<html>
 <head>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-    <script src='https://code.responsivevoice.org/responsivevoice.js'></script>
 </head>
 
 <body>
@@ -12,15 +11,14 @@
                 <input type='file' accept="image/*" onchange="loadImage(event)" id="filename" name="filename" class="hidden" />
             </label>
             <br />
-            <img id="emotionIMG" style="width:100%;" />
+            <img id="emotionIMG" />
         </div>
         <div class="col-sm-6">
-            <button id="btn" class="btn btn-primary" onclick="resetValues()">Emojify</button>
+            <button id="btn" class="btn btn-primary">Emojify</button>
             <br />
-            <canvas id="myCanvas" style="width:100%;" ></canvas>
-        </div>
-        <div class="col-sm-12">
-            <p id="response">Let's see what emotions you have!</p>
+            <canvas id="myCanvas" />
+            <p id="response">hello!</p>
+
         </div>
     </div>
 
@@ -32,8 +30,6 @@
         var apiUrl = "https://api.projectoxford.ai/emotion/v1.0/recognize";
 
         // Global variables
-        var requestInProgress = false;
-        var isPaused = false;
         var faceList = {}; // create an empty array
         var addpair = function (my_key, my_value) {
             faceList[my_key] = my_value;
@@ -51,18 +47,6 @@
         }
         var updatepair2 = function (my_key) {
             emotionsDetected[my_key] += 1;
-        }
-        var gethigher = function () {
-            var highest = 0;
-            var mostEmotion = "";
-            for (var emotion in emotionsDetected) {
-                if (highest < emotionsDetected[emotion]) {
-                    mostEmotion = emotion;
-
-                }
-
-            }
-            return mostEmotion;
         }
 
         addpair("Angry", ["😡", "😠"])
@@ -107,11 +91,10 @@
 
                 addEmoji: function (top, left, width, height, currentEmotion) {
                     //var fontSizes = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200];
-                    var emojiWidth;
+                    var emojiWidth, i = 0;
                     var fontsize = 5;
                     var emojiCount = faceList[currentEmotion].length;
                     var randomEmoji = Math.floor(Math.random() * emojiCount)
-                    var xPos, yPos;
 
                     do {
                         context.font = fontsize + 'px Arial';
@@ -120,16 +103,8 @@
                     } while (emojiWidth < width)
 
                     fontsize -= 5;
-                    if (fontsize > 225) {
-                        fontsize = 225;
-                        xPos = parseInt(left) + parseInt(width) / 5;
-                        yPos = parseInt(top) + parseInt(height) / 1.5;
-                    } else {
-                        xPos = parseInt(left) - 2;
-                        yPos = parseInt(top) + parseInt(height) - 10;
-                    }
                     context.font = fontsize + 'px serif';
-                    context.fillText(faceList[currentEmotion][randomEmoji], xPos, yPos);
+                    context.fillText(faceList[currentEmotion][randomEmoji], parseInt(left) - 2, parseInt(top) + parseInt(height) - 10);
                 }
             }
 
@@ -141,24 +116,16 @@
             output.src = URL.createObjectURL(event.target.files[0]);
         };
 
-        //$('#btn').click(function () {
-        //});
+        $('#btn').click(function () {
+            document.getElementById('response').innerHTML = '';
+            emotionsDetected = {};
+            var file = document.getElementById('filename').files[0];
 
-        function resetValues() {
-            if (!requestInProgress) {
-                requestInProgress = true;
+            Painter.init(document.getElementById("myCanvas").getContext("2d"));
+            Painter.loadCanvas();
 
-                emotionsDetected = {};
-
-                var file = document.getElementById('filename').files[0];
-
-                Painter.init(document.getElementById("myCanvas").getContext("2d"));
-                Painter.loadCanvas();
-
-                CallAPI(file, apiUrl, apiKey);
-
-            }
-        }
+            CallAPI(file, apiUrl, apiKey);
+        });
 
         function CallAPI(file, apiUrl, apiKey) {
             $.ajax({
@@ -201,38 +168,11 @@
 
                 Painter.addEmoji(top, left, width, height, currentEmotion);
             }
-            
-            listEmotions();
-
-        }
-
-        function listEmotions() {
-            var listInString = "";
 
             for (var key in emotionsDetected) {
-
-                listInString += key + " (" + getvalue2(key) + ") ";
+                var text = document.getElementById('response') = key + " (" + getvalue2(key) + ")";
             }
-
-            var highest = gethigher();
-            var count = Object.keys(emotionsDetected).length;
-
-            document.getElementById('response').innerHTML = '';
-            if (count > 1) {
-                responsiveVoice.speak("The people in this image are mostly " + highest);
-                document.getElementById('response').innerHTML = listInString;
-            } else if (count == 1 && emotionsDetected[highest] > 1) {
-                responsiveVoice.speak("The people in this image are " + highest);
-                document.getElementById('response').innerHTML = listInString;
-            } else if (count == 1 && emotionsDetected[highest] == 1) {
-                responsiveVoice.speak("The person in this image is " + highest);
-                document.getElementById('response').innerHTML = listInString;
-            } else if (count < 1) {
-                responsiveVoice.speak("There is no face detected");
-                document.getElementById('response').innerHTML = "No face detected";
-            }
-            requestInProgress = false;
-
+            
         }
 
         function findEmotion(response, i) {
