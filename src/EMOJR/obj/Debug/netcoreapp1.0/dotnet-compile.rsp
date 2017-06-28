@@ -1,5 +1,5 @@
---temp-output:C:\Users\Karl\Desktop\EMOJR-ASP\src\EMOJR\obj\Debug\netcoreapp1.0\
---out:C:\Users\Karl\Desktop\EMOJR-ASP\src\EMOJR\bin\Debug\netcoreapp1.0\EMOJR.dll
+--temp-output:C:\Users\Karl\Documents\Visual Studio 2015\Projects\EMOJR-ASP\src\EMOJR\obj\Debug\netcoreapp1.0\
+--out:C:\Users\Karl\Documents\Visual Studio 2015\Projects\EMOJR-ASP\src\EMOJR\bin\Debug\netcoreapp1.0\EMOJR.dll
 --define:DEBUG
 --define:TRACE
 --define:NETCOREAPP1_0
@@ -190,7 +190,7 @@
 --reference:C:\Users\Karl\.nuget\packages\System.Threading.Timer\4.0.1\ref\netstandard1.2\System.Threading.Timer.dll
 --reference:C:\Users\Karl\.nuget\packages\System.Xml.ReaderWriter\4.0.11\ref\netstandard1.3\System.Xml.ReaderWriter.dll
 --reference:C:\Users\Karl\.nuget\packages\System.Xml.XDocument\4.0.11\ref\netstandard1.3\System.Xml.XDocument.dll
---resource:"C:\Users\Karl\Desktop\EMOJR-ASP\src\EMOJR\obj\Debug\netcoreapp1.0\EMOJRdotnet-compile.deps.json",EMOJR.deps.json
-C:\Users\Karl\Desktop\EMOJR-ASP\src\EMOJR\Program.cs
-C:\Users\Karl\Desktop\EMOJR-ASP\src\EMOJR\Startup.cs
-C:\Users\Karl\Desktop\EMOJR-ASP\src\EMOJR\Controllers\HomeController.cs
+--resource:"C:\Users\Karl\Documents\Visual Studio 2015\Projects\EMOJR-ASP\src\EMOJR\obj\Debug\netcoreapp1.0\EMOJRdotnet-compile.deps.json",EMOJR.deps.json
+C:\Users\Karl\Documents\Visual Studio 2015\Projects\EMOJR-ASP\src\EMOJR\Program.cs
+C:\Users\Karl\Documents\Visual Studio 2015\Projects\EMOJR-ASP\src\EMOJR\Startup.cs
+C:\Users\Karl\Documents\Visual Studio 2015\Projects\EMOJR-ASP\src\EMOJR\Controllers\HomeController.cs
